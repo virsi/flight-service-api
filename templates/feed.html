@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Обслуживание рейса — лента</title>
+  <link rel="stylesheet" href="/static/styles/style.css">
+</head>
+<body>
+  <div class="app app-feed">
+    <video class="feed-video" src="{{ .resource.VideoURL }}" autoplay muted loop playsinline></video>
+
+    <div class="feed-overlay">
+      <header class="feed-header">
+        <h1>Обслуживание рейса</h1>
+        <p class="subtitle">Рейс SU-123 · 12:30</p>
+      </header>
+
+      <div class="feed-content">
+        <h2 class="feed-name">{{ .resource.Name }}</h2>
+        <span class="chip">{{ .resource.Category }}</span>
+        <p class="feed-desc">{{ .resource.Description }} <a class="more" href="#">больше</a></p>
+        <p class="feed-price">{{ .resource.Price }} ₽/{{ .resource.Unit }}</p>
+        <div class="feed-actions">
+          <span class="likes">♥ {{ .likesCount }}</span>
+          <a class="btn-next" href="/resource/{{ .resource.ID }}?next=true">Следующий</a>
+        </div>
+      </div>
+    </div>
+
+    <nav class="tabbar">
+      <a href="/feed" class="tab active"><span class="icon">▶</span><span class="label">Лента</span><span class="underline"></span></a>
+      <a href="/draft" class="tab"><span class="icon">+</span><span class="label">Добавление</span><span class="underline"></span></a>
+      <a href="/resources" class="tab"><span class="icon">▦</span><span class="label">Плитка</span><span class="underline"></span></a>
+    </nav>
+  </div>
+</body>
+</html>

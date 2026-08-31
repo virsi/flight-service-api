@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Обслуживание рейса — ресурсы</title>
+  <link rel="stylesheet" href="/static/styles/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>Обслуживание рейса</h1>
+      <p class="subtitle">Ресурсы обслуживания аэропорта</p>
+    </header>
+
+    <form class="filter" action="/resources" method="GET">
+      <input type="text" name="price" placeholder="Цена до, ₽" value="{{ .price }}">
+      <button type="submit">Найти</button>
+    </form>
+
+    <div class="grid">
+      {{ range .resources }}
+      <a class="card" href="/resource/{{ .Resource.ID }}">
+        <img src="{{ .Resource.ImageURL }}" alt="{{ .Resource.Name }}">
+        <div class="card-body">
+          <p class="name">{{ .Resource.Name }}</p>
+          <p class="price">{{ .Resource.Price }} ₽/{{ .Resource.Unit }}</p>
+          <span class="likes">♥ {{ .LikesCount }}</span>
+        </div>
+      </a>
+      {{ end }}
+    </div>
+
+    <nav class="tabbar">
+      <a href="/feed" class="tab"><span class="icon">▶</span><span class="label">Лента</span><span class="underline"></span></a>
+      <a href="/draft" class="tab"><span class="icon">+</span><span class="label">Добавление</span><span class="underline"></span></a>
+      <a href="/resources" class="tab active"><span class="icon">▦</span><span class="label">Плитка</span><span class="underline"></span></a>
+    </nav>
+  </div>
+</body>
+</html>

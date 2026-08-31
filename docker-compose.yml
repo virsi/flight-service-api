@@ -1,0 +1,20 @@
+# Развертывание объектного хранилища MinIO для лабораторной №1.
+# После запуска создать публичный бакет «flight-media» и загрузить в него
+# изображения и видео ресурсов (ключи на латинице, см. repository.go).
+services:
+  minio:
+    container_name: minio_storage
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"   # S3 API (отсюда берутся ссылки на файлы)
+      - "9001:9001"   # веб-консоль MinIO
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}  # берём из .env (см. .env.example)
+      MINIO_CONSOLE_ADDRESS: ":9001"
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+
+volumes:
+  minio-data:

@@ -1,0 +1,191 @@
+/* Стили приложения «Обслуживание рейса» (палитра Aeroflot) */
+
+:root {
+  --navy: #041839;
+  --blue: #10349E;
+  --orange: #EF8A06;
+  --bg: #F2F3F5;
+  --border: #E1E3E7;
+  --muted: #364661;
+  --disabled: #AAB0BC;
+  --white: #FFFFFF;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Golos Text", "Inter", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--navy);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 390px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--white);
+  padding-bottom: 80px; /* место под нижнюю панель вкладок */
+}
+
+/* Шапка */
+.header { padding: 20px 16px 12px; }
+.header h1 { font-family: "Leksa Sans Pro Bold", "Inter", sans-serif; font-size: 18px; margin: 0 0 4px; }
+.header .subtitle { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Нижняя панель вкладок */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 390px;
+  height: 64px;
+  background: var(--white);
+  border-radius: 32px 32px 0 0;
+  display: flex;
+  box-shadow: 0 -4px 16px rgba(4, 24, 57, 0.08);
+  z-index: 10;
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--muted);
+  position: relative;
+}
+.tab .icon { font-size: 16px; line-height: 1; }
+.tab .label { font-size: 11px; }
+.tab.active { color: var(--blue); }
+.tab .underline { position: absolute; bottom: 8px; width: 24px; height: 2px; border-radius: 1px; background: transparent; }
+.tab.active .underline { background: var(--orange); }
+
+/* Плитка: фильтр */
+.filter { display: flex; gap: 12px; padding: 8px 16px 16px; }
+.filter input {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: var(--bg);
+  padding: 0 14px;
+  font-size: 15px;
+  color: var(--navy);
+  outline: none;
+}
+.filter button {
+  width: 96px;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: var(--blue);
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Плитка: сетка карточек */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 16px; }
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--navy);
+  box-shadow: 0 2px 8px rgba(4, 24, 57, 0.06);
+}
+.card img { width: 100%; height: 120px; object-fit: cover; display: block; background: var(--border); }
+.card .card-body { padding: 10px; }
+.card .name { font-size: 13px; font-weight: 500; margin: 0 0 6px; }
+.card .price { font-size: 13px; font-weight: 700; color: var(--blue); margin: 0 0 4px; }
+.card .likes { font-size: 11px; color: var(--muted); }
+
+/* Лента */
+.app-feed { background: var(--navy); color: var(--white); position: relative; overflow: hidden; padding-bottom: 80px; }
+.feed-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.feed-overlay {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: calc(100vh - 80px);
+  padding: 20px 16px;
+  background: linear-gradient(180deg, rgba(4, 24, 57, 0) 0%, rgba(4, 24, 57, 0.7) 100%);
+}
+.feed-header h1 { font-family: "Leksa Sans Pro Bold", "Inter", sans-serif; font-size: 18px; margin: 0 0 4px; }
+.feed-header .subtitle { font-size: 13px; color: var(--disabled); margin: 0; }
+.feed-name { font-size: 22px; margin: 0 0 10px; }
+.chip {
+  display: inline-block;
+  background: var(--orange);
+  color: var(--white);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.feed-desc { font-size: 14px; margin: 0 0 6px; max-width: 320px; }
+.feed-desc .more { color: var(--orange); text-decoration: none; }
+.feed-price { font-size: 18px; font-weight: 700; margin: 0 0 14px; }
+.feed-actions { display: flex; align-items: center; justify-content: space-between; }
+.feed-actions .likes { font-size: 14px; }
+.btn-next {
+  background: var(--blue);
+  color: var(--white);
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Добавление: форма */
+.form { padding: 8px 16px 24px; }
+.section-title { font-size: 13px; font-weight: 500; color: var(--muted); margin: 0 0 8px; }
+.upload {
+  height: 90px;
+  border-radius: 12px;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--disabled);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.field input {
+  width: 100%;
+  height: 38px;
+  border: none;
+  border-radius: 8px;
+  background: var(--bg);
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--navy);
+  outline: none;
+}
+.field-row { display: flex; gap: 12px; }
+.field-row .field { flex: 1; }
+.btn-save {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: var(--border);
+  color: var(--disabled);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: not-allowed;
+  margin-top: 4px;
+}
+.note { font-size: 11px; color: var(--disabled); margin: 8px 0 0; }
