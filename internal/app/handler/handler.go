@@ -10,8 +10,6 @@ import (
 	"flight-service-api/internal/app/repository"
 )
 
-// Handler обрабатывает входящие запросы, валидирует параметры
-// и вызывает методы уровня репозитория.
 type Handler struct {
 	Repository *repository.Repository
 }
@@ -23,13 +21,12 @@ func NewHandler(r *repository.Repository) *Handler {
 }
 
 // resourceView — ресурс + количество лайков, вычисленное в обработчике
-// по коллекции (для страницы «Плитка»).
 type resourceView struct {
 	Resource   repository.Resource
 	LikesCount int
 }
 
-// toViews превращает список ресурсов в список представлений с количеством лайков.
+// toViews превращает список ресурсов в список представлений с количеством лайков
 func toViews(resources []repository.Resource) []resourceView {
 	views := make([]resourceView, 0, len(resources))
 	for _, res := range resources {
@@ -42,13 +39,12 @@ func toViews(resources []repository.Resource) []resourceView {
 }
 
 // GetResources — страница «Плитка»: список опубликованных ресурсов
-// с фильтрацией на сервере по цене.
 func (h *Handler) GetResources(ctx *gin.Context) {
 	var resources []repository.Resource
 	var err error
 
-	priceQuery := ctx.Query("price") // значение из поля фильтра по цене
-	if priceQuery == "" {            // если поле пусто, отдаём все опубликованные
+	priceQuery := ctx.Query("price")
+	if priceQuery == "" {
 		resources, err = h.Repository.GetPublishedResources()
 		if err != nil {
 			logrus.Error(err)
@@ -66,12 +62,11 @@ func (h *Handler) GetResources(ctx *gin.Context) {
 
 	ctx.HTML(http.StatusOK, "index.html", gin.H{
 		"resources": toViews(resources),
-		"price":     priceQuery, // возвращаем введённый фильтр обратно на страницу
+		"price":     priceQuery,
 	})
 }
 
-// GetResource — страница «Лента»: одна карточка по ID.
-// Если передан ?next=true, открывается следующий ресурс после этого ID.
+// GetResource — страница Лента одна карточка по ID
 func (h *Handler) GetResource(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -97,10 +92,9 @@ func (h *Handler) GetResource(ctx *gin.Context) {
 	})
 }
 
-// GetFeed — страница «Лента» без указания ID (переход из панели вкладок).
-// Открывает первый опубликованный ресурс.
+// GetFeed — страница Лента без указания ID
 func (h *Handler) GetFeed(ctx *gin.Context) {
-	id, err := h.Repository.GetNextResourceID(0) // 0 — берём первый опубликованный
+	id, err := h.Repository.GetNextResourceID(0)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -116,7 +110,7 @@ func (h *Handler) GetFeed(ctx *gin.Context) {
 	})
 }
 
-// GetDraft — страница «Добавление»: показывает ресурс в статусе «черновик».
+// GetDraft — страница Добавление показывает ресурс в статусе черновик
 func (h *Handler) GetDraft(ctx *gin.Context) {
 	draft, err := h.Repository.GetDraft()
 	if err != nil {
