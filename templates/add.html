@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Обслуживание рейса — добавление</title>
+  <link rel="stylesheet" href="/static/styles/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>Добавление</h1>
+      <p class="subtitle">Черновик новой услуги</p>
+    </header>
+
+    <div class="form">
+      <p class="section-title">Изображение</p>
+      <div class="upload">
+        <img src="{{ .resource.ImageURL }}" alt="{{ .resource.Name }}">
+      </div>
+
+      <p class="section-title">Видео</p>
+      <div class="upload">Загрузить видео</div>
+
+      <p class="section-title">Текст</p>
+      <div class="field">
+        <label>Название</label>
+        <input type="text" value="{{ .resource.Name }}">
+      </div>
+      <div class="field">
+        <label>Краткое описание</label>
+        <input type="text" value="{{ .resource.Description }}">
+      </div>
+
+      <p class="section-title">Параметры</p>
+      <div class="field-row">
+        <div class="field">
+          <label>Единица измерения</label>
+          <input type="text" value="{{ .resource.Unit }}">
+        </div>
+        <div class="field">
+          <label>Цена</label>
+          <input type="number" value="{{ .resource.Price }}">
+        </div>
+      </div>
+      <div class="field">
+        <label>Категория</label>
+        <input type="text" value="{{ .resource.Category }}">
+      </div>
+
+      <button class="btn-save" disabled>Сохранить</button>
+    </div>
+
+    <nav class="tabbar">
+      <a href="/feed" class="tab"><span class="icon">▶</span><span class="label">Лента</span><span class="underline"></span></a>
+      <a href="/draft" class="tab active"><span class="icon">+</span><span class="label">Добавление</span><span class="underline"></span></a>
+      <a href="/resources" class="tab"><span class="icon">▦</span><span class="label">Плитка</span><span class="underline"></span></a>
+    </nav>
+  </div>
+</body>
+</html>

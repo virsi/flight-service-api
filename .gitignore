@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# переменные окружения
+.env
+
+# бинарники
+/app
+/flight-service-api
+*.exe
+
+# Go
+vendor/
+*.test
