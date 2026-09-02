@@ -11,18 +11,18 @@ func NewRepository() (*Repository, error) {
 
 type Resource struct {
 	ID          int
-	Name        string  // наименование ресурса
-	Description string  // краткое описание
-	Status      string  // черновик / опубликован / удален
-	ImageURL    string  // ссылка на изображение в Minio
-	VideoURL    string  // ссылка на видео в Minio
-	Unit        string  // единица измерения
-	Price       float64 // цена за единицу
-	Category    string  // категория ресурса
-	CreatedAt   string  // дата создания
-	Creator     string  // создатель
-	FormedAt    string  // дата формирования
-	Likes       []int   // вложенные лайки (ID пользователей)
+	Name        string
+	Description string
+	Status      string
+	ImageURL    string
+	VideoURL    string
+	Unit        string
+	Price       float64
+	Category    string
+	CreatedAt   string
+	Creator     string
+	FormedAt    string
+	Likes       []int
 }
 
 func (r *Repository) GetResources() ([]Resource, error) {

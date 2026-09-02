@@ -15,7 +15,9 @@
 
     <div class="form">
       <p class="section-title">Изображение</p>
-      <div class="upload">Загрузить изображение</div>
+      <div class="upload">
+        <img src="{{ .resource.ImageURL }}" alt="{{ .resource.Name }}">
+      </div>
 
       <p class="section-title">Видео</p>
       <div class="upload">Загрузить видео</div>

@@ -20,13 +20,11 @@ func NewHandler(r *repository.Repository) *Handler {
 	}
 }
 
-// resourceView — ресурс + количество лайков, вычисленное в обработчике
 type resourceView struct {
 	Resource   repository.Resource
 	LikesCount int
 }
 
-// toViews превращает список ресурсов в список представлений с количеством лайков
 func toViews(resources []repository.Resource) []resourceView {
 	views := make([]resourceView, 0, len(resources))
 	for _, res := range resources {
@@ -38,7 +36,6 @@ func toViews(resources []repository.Resource) []resourceView {
 	return views
 }
 
-// GetResources — страница «Плитка»: список опубликованных ресурсов
 func (h *Handler) GetResources(ctx *gin.Context) {
 	var resources []repository.Resource
 	var err error
@@ -66,7 +63,6 @@ func (h *Handler) GetResources(ctx *gin.Context) {
 	})
 }
 
-// GetResource — страница Лента одна карточка по ID
 func (h *Handler) GetResource(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -92,7 +88,6 @@ func (h *Handler) GetResource(ctx *gin.Context) {
 	})
 }
 
-// GetFeed — страница Лента без указания ID
 func (h *Handler) GetFeed(ctx *gin.Context) {
 	id, err := h.Repository.GetNextResourceID(0)
 	if err != nil {
@@ -110,7 +105,6 @@ func (h *Handler) GetFeed(ctx *gin.Context) {
 	})
 }
 
-// GetDraft — страница Добавление показывает ресурс в статусе черновик
 func (h *Handler) GetDraft(ctx *gin.Context) {
 	draft, err := h.Repository.GetDraft()
 	if err != nil {
