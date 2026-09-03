@@ -16,47 +16,41 @@
     <div class="form">
       <p class="section-title">Изображение</p>
       <div class="upload">
-        <img src="{{ .resource.ImageURL }}" alt="{{ .resource.Name }}">
+        <img src="{{ .flightService.ImageURL }}" alt="{{ .flightService.Name }}">
       </div>
 
       <p class="section-title">Видео</p>
       <div class="upload">
-        <video src="{{ .resource.VideoURL }}" controls></video>
+        <video src="{{ .flightService.VideoURL }}" controls></video>
       </div>
 
       <p class="section-title">Текст</p>
       <div class="field">
         <label>Название</label>
-        <input type="text" value="{{ .resource.Name }}">
+        <input type="text" value="{{ .flightService.Name }}">
       </div>
       <div class="field">
         <label>Краткое описание</label>
-        <input type="text" value="{{ .resource.Description }}">
+        <input type="text" value="{{ .flightService.Description }}">
       </div>
 
       <p class="section-title">Параметры</p>
       <div class="field-row">
         <div class="field">
           <label>Единица измерения</label>
-          <input type="text" value="{{ .resource.Unit }}">
+          <input type="text" value="{{ .flightService.Unit }}">
         </div>
         <div class="field">
           <label>Цена</label>
-          <input type="number" value="{{ .resource.Price }}">
+          <input type="number" value="{{ .flightService.Price }}">
         </div>
       </div>
-      <div class="field">
-        <label>Категория</label>
-        <input type="text" value="{{ .resource.Category }}">
-      </div>
-
-      <button class="btn-save" disabled>Сохранить</button>
     </div>
 
     <nav class="tabbar">
-      <a href="/feed" class="tab"><span class="icon">▶</span><span class="label">Лента</span><span class="underline"></span></a>
-      <a href="/draft" class="tab active"><span class="icon">+</span><span class="label">Добавление</span><span class="underline"></span></a>
-      <a href="/resources" class="tab"><span class="icon">▦</span><span class="label">Плитка</span><span class="underline"></span></a>
+      <a href="/flight-feed" class="tab"><span class="icon">▶</span><span class="label">Лента</span><span class="underline"></span></a>
+      <a href="/flight-draft" class="tab active"><span class="icon">+</span><span class="label">Добавление</span><span class="underline"></span></a>
+      <a href="/flight-resources" class="tab"><span class="icon">▦</span><span class="label">Плитка</span><span class="underline"></span></a>
     </nav>
   </div>
 </body>

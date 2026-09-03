@@ -20,29 +20,29 @@ func NewHandler(r *repository.Repository) *Handler {
 	}
 }
 
-type resourceView struct {
-	Resource   repository.Resource
-	LikesCount int
+type flightServiceView struct {
+	FlightService repository.FlightService
+	LikesCount    int
 }
 
-func toViews(resources []repository.Resource) []resourceView {
-	views := make([]resourceView, 0, len(resources))
-	for _, res := range resources {
-		views = append(views, resourceView{
-			Resource:   res,
-			LikesCount: len(res.Likes),
+func toFlightServiceViews(services []repository.FlightService) []flightServiceView {
+	views := make([]flightServiceView, 0, len(services))
+	for _, res := range services {
+		views = append(views, flightServiceView{
+			FlightService: res,
+			LikesCount:    len(res.Likes),
 		})
 	}
 	return views
 }
 
-func (h *Handler) GetResources(ctx *gin.Context) {
-	var resources []repository.Resource
+func (h *Handler) GetFlightServices(ctx *gin.Context) {
+	var services []repository.FlightService
 	var err error
 
 	priceQuery := ctx.Query("price")
 	if priceQuery == "" {
-		resources, err = h.Repository.GetPublishedResources()
+		services, err = h.Repository.GetPublishedFlightServices()
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -51,19 +51,19 @@ func (h *Handler) GetResources(ctx *gin.Context) {
 		if parseErr != nil {
 			logrus.Error(parseErr)
 		}
-		resources, err = h.Repository.GetResourcesByPrice(maxPrice)
+		services, err = h.Repository.GetFlightServicesByPrice(maxPrice)
 		if err != nil {
 			logrus.Error(err)
 		}
 	}
 
 	ctx.HTML(http.StatusOK, "index.html", gin.H{
-		"resources": toViews(resources),
-		"price":     priceQuery,
+		"flightServices": toFlightServiceViews(services),
+		"price":          priceQuery,
 	})
 }
 
-func (h *Handler) GetResource(ctx *gin.Context) {
+func (h *Handler) GetFlightService(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -71,47 +71,47 @@ func (h *Handler) GetResource(ctx *gin.Context) {
 	}
 
 	if ctx.Query("next") == "true" {
-		id, err = h.Repository.GetNextResourceID(id)
+		id, err = h.Repository.GetNextFlightServiceID(id)
 		if err != nil {
 			logrus.Error(err)
 		}
 	}
 
-	resource, err := h.Repository.GetResource(id)
+	service, err := h.Repository.GetFlightService(id)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	ctx.HTML(http.StatusOK, "feed.html", gin.H{
-		"resource":   resource,
-		"likesCount": len(resource.Likes),
+		"flightService": service,
+		"likesCount":    len(service.Likes),
 	})
 }
 
-func (h *Handler) GetFeed(ctx *gin.Context) {
-	id, err := h.Repository.GetNextResourceID(0)
+func (h *Handler) GetFlightFeed(ctx *gin.Context) {
+	id, err := h.Repository.GetNextFlightServiceID(0)
 	if err != nil {
 		logrus.Error(err)
 	}
 
-	resource, err := h.Repository.GetResource(id)
+	service, err := h.Repository.GetFlightService(id)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	ctx.HTML(http.StatusOK, "feed.html", gin.H{
-		"resource":   resource,
-		"likesCount": len(resource.Likes),
+		"flightService": service,
+		"likesCount":    len(service.Likes),
 	})
 }
 
-func (h *Handler) GetDraft(ctx *gin.Context) {
-	draft, err := h.Repository.GetDraft()
+func (h *Handler) GetFlightDraft(ctx *gin.Context) {
+	draft, err := h.Repository.GetDraftFlightService()
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	ctx.HTML(http.StatusOK, "add.html", gin.H{
-		"resource": draft,
+		"flightService": draft,
 	})
 }

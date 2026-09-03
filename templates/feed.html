@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="app app-feed">
-    <video class="feed-video" src="{{ .resource.VideoURL }}" autoplay muted loop playsinline></video>
+    <video class="feed-video" src="{{ .flightService.VideoURL }}" autoplay muted loop playsinline></video>
 
     <div class="feed-overlay">
       <header class="feed-header">
@@ -17,21 +17,24 @@
       </header>
 
       <div class="feed-content">
-        <h2 class="feed-name">{{ .resource.Name }}</h2>
-        <span class="chip">{{ .resource.Category }}</span>
-        <p class="feed-desc">{{ .resource.Description }} <a class="more" href="#">больше</a></p>
-        <p class="feed-price">{{ .resource.Price }} ₽/{{ .resource.Unit }}</p>
         <div class="feed-actions">
-          <span class="likes">♥ {{ .likesCount }}</span>
-          <a class="btn-next" href="/resource/{{ .resource.ID }}?next=true">Следующий</a>
+          <div class="like-group">
+            <button class="btn-like" type="button">♥</button>
+            <span class="likes-count">{{ .likesCount }}</span>
+          </div>
+          <a class="btn-next" href="/flight-resource/{{ .flightService.ID }}?next=true">→</a>
         </div>
+        <h2 class="feed-name">{{ .flightService.Name }}</h2>
+        <span class="chip">{{ .flightService.Category }}</span>
+        <p class="feed-desc">{{ .flightService.Description }} <a class="more" href="#">больше</a></p>
+        <p class="feed-price">{{ .flightService.Price }} ₽/{{ .flightService.Unit }}</p>
       </div>
     </div>
 
     <nav class="tabbar">
-      <a href="/feed" class="tab active"><span class="icon">▶</span><span class="label">Лента</span><span class="underline"></span></a>
-      <a href="/draft" class="tab"><span class="icon">+</span><span class="label">Добавление</span><span class="underline"></span></a>
-      <a href="/resources" class="tab"><span class="icon">▦</span><span class="label">Плитка</span><span class="underline"></span></a>
+      <a href="/flight-feed" class="tab active"><span class="icon">▶</span><span class="label">Лента</span><span class="underline"></span></a>
+      <a href="/flight-draft" class="tab"><span class="icon">+</span><span class="label">Добавление</span><span class="underline"></span></a>
+      <a href="/flight-resources" class="tab"><span class="icon">▦</span><span class="label">Плитка</span><span class="underline"></span></a>
     </nav>
   </div>
 </body>

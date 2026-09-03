@@ -13,18 +13,23 @@
       <p class="subtitle">Ресурсы обслуживания аэропорта</p>
     </header>
 
-    <form class="filter" action="/resources" method="GET">
-      <input type="text" name="price" placeholder="Цена до, ₽" value="{{ .price }}">
+    <form class="filter" action="/flight-resources" method="GET">
+      <div class="filter-slider">
+        <label for="price">Цена до: <span id="price-value">{{ if .price }}{{ .price }}{{ else }}20000{{ end }} ₽</span></label>
+        <input type="range" id="price" name="price" min="0" max="20000" step="100"
+               value="{{ if .price }}{{ .price }}{{ else }}20000{{ end }}"
+               oninput="document.getElementById('price-value').textContent = this.value + ' ₽'">
+      </div>
       <button type="submit">Найти</button>
     </form>
 
     <div class="grid">
-      {{ range .resources }}
-      <a class="card" href="/resource/{{ .Resource.ID }}">
-        <img src="{{ .Resource.ImageURL }}" alt="{{ .Resource.Name }}">
+      {{ range .flightServices }}
+      <a class="card" href="/flight-resource/{{ .FlightService.ID }}">
+        <img src="{{ .FlightService.ImageURL }}" alt="{{ .FlightService.Name }}">
         <div class="card-body">
-          <p class="name">{{ .Resource.Name }}</p>
-          <p class="price">{{ .Resource.Price }} ₽/{{ .Resource.Unit }}</p>
+          <p class="name">{{ .FlightService.Name }}</p>
+          <p class="price">{{ .FlightService.Price }} ₽/{{ .FlightService.Unit }}</p>
           <span class="likes">♥ {{ .LikesCount }}</span>
         </div>
       </a>
@@ -32,9 +37,9 @@
     </div>
 
     <nav class="tabbar">
-      <a href="/feed" class="tab"><span class="icon">▶</span><span class="label">Лента</span><span class="underline"></span></a>
-      <a href="/draft" class="tab"><span class="icon">+</span><span class="label">Добавление</span><span class="underline"></span></a>
-      <a href="/resources" class="tab active"><span class="icon">▦</span><span class="label">Плитка</span><span class="underline"></span></a>
+      <a href="/flight-feed" class="tab"><span class="icon">▶</span><span class="label">Лента</span><span class="underline"></span></a>
+      <a href="/flight-draft" class="tab"><span class="icon">+</span><span class="label">Добавление</span><span class="underline"></span></a>
+      <a href="/flight-resources" class="tab active"><span class="icon">▦</span><span class="label">Плитка</span><span class="underline"></span></a>
     </nav>
   </div>
 </body>

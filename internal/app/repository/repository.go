@@ -9,7 +9,7 @@ func NewRepository() (*Repository, error) {
 	return &Repository{}, nil
 }
 
-type Resource struct {
+type FlightService struct {
 	ID          int
 	Name        string
 	Description string
@@ -25,8 +25,8 @@ type Resource struct {
 	Likes       []int
 }
 
-func (r *Repository) GetResources() ([]Resource, error) {
-	resources := []Resource{
+func (r *Repository) GetFlightServices() ([]FlightService, error) {
+	services := []FlightService{
 		{
 			ID: 1, Name: "Аэродромный тягач Goldhofer AST-2X",
 			Description: "Буксировка и постановка воздушного судна на стоянку.",
@@ -109,21 +109,21 @@ func (r *Repository) GetResources() ([]Resource, error) {
 		},
 	}
 
-	if len(resources) == 0 {
+	if len(services) == 0 {
 		return nil, fmt.Errorf("массив пустой")
 	}
 
-	return resources, nil
+	return services, nil
 }
 
-func (r *Repository) GetPublishedResources() ([]Resource, error) {
-	resources, err := r.GetResources()
+func (r *Repository) GetPublishedFlightServices() ([]FlightService, error) {
+	services, err := r.GetFlightServices()
 	if err != nil {
 		return nil, err
 	}
 
-	var published []Resource
-	for _, res := range resources {
+	var published []FlightService
+	for _, res := range services {
 		if res.Status == "опубликован" {
 			published = append(published, res)
 		}
@@ -132,13 +132,13 @@ func (r *Repository) GetPublishedResources() ([]Resource, error) {
 	return published, nil
 }
 
-func (r *Repository) GetResourcesByPrice(maxPrice float64) ([]Resource, error) {
-	published, err := r.GetPublishedResources()
+func (r *Repository) GetFlightServicesByPrice(maxPrice float64) ([]FlightService, error) {
+	published, err := r.GetPublishedFlightServices()
 	if err != nil {
 		return nil, err
 	}
 
-	var result []Resource
+	var result []FlightService
 	for _, res := range published {
 		if res.Price <= maxPrice {
 			result = append(result, res)
@@ -148,29 +148,29 @@ func (r *Repository) GetResourcesByPrice(maxPrice float64) ([]Resource, error) {
 	return result, nil
 }
 
-func (r *Repository) GetResource(id int) (Resource, error) {
-	resources, err := r.GetResources()
+func (r *Repository) GetFlightService(id int) (FlightService, error) {
+	services, err := r.GetFlightServices()
 	if err != nil {
-		return Resource{}, err
+		return FlightService{}, err
 	}
 
-	for _, res := range resources {
+	for _, res := range services {
 		if res.ID == id {
 			return res, nil
 		}
 	}
 
-	return Resource{}, fmt.Errorf("ресурс не найден")
+	return FlightService{}, fmt.Errorf("услуга не найдена")
 }
 
-func (r *Repository) GetNextResourceID(id int) (int, error) {
-	published, err := r.GetPublishedResources()
+func (r *Repository) GetNextFlightServiceID(id int) (int, error) {
+	published, err := r.GetPublishedFlightServices()
 	if err != nil {
 		return 0, err
 	}
 
 	if len(published) == 0 {
-		return 0, fmt.Errorf("нет опубликованных ресурсов")
+		return 0, fmt.Errorf("нет опубликованных услуг")
 	}
 
 	for _, res := range published {
@@ -182,17 +182,17 @@ func (r *Repository) GetNextResourceID(id int) (int, error) {
 	return published[0].ID, nil
 }
 
-func (r *Repository) GetDraft() (Resource, error) {
-	resources, err := r.GetResources()
+func (r *Repository) GetDraftFlightService() (FlightService, error) {
+	services, err := r.GetFlightServices()
 	if err != nil {
-		return Resource{}, err
+		return FlightService{}, err
 	}
 
-	for _, res := range resources {
+	for _, res := range services {
 		if res.Status == "черновик" {
 			return res, nil
 		}
 	}
 
-	return Resource{}, fmt.Errorf("черновик не найден")
+	return FlightService{}, fmt.Errorf("черновик не найден")
 }

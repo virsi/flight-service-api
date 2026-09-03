@@ -24,10 +24,10 @@ func StartServer() {
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/static", "./resources")
 
-	r.GET("/resources", handlers.GetResources)
-	r.GET("/resource/:id", handlers.GetResource)
-	r.GET("/feed", handlers.GetFeed)
-	r.GET("/draft", handlers.GetDraft)
+	r.GET("/flight-resources", handlers.GetFlightServices)
+	r.GET("/flight-resource/:id", handlers.GetFlightService)
+	r.GET("/flight-feed", handlers.GetFlightFeed)
+	r.GET("/flight-draft", handlers.GetFlightDraft)
 
 	r.Run()
 
