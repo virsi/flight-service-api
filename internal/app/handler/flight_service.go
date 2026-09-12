@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -117,4 +118,29 @@ func (h *Handler) GetFlightDraft(ctx *gin.Context) {
 	ctx.HTML(http.StatusOK, "add.html", gin.H{
 		"flightService": draft,
 	})
+}
+
+// CreateFlightDraft — кнопка «Далее»: создание черновика
+func (h *Handler) CreateFlightDraft(ctx *gin.Context) {
+	draft, err := h.Repository.GetDraftFlightService()
+	if err != nil {
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		return
+	}
+	if draft != nil {
+		h.errorHandler(ctx, http.StatusConflict, fmt.Errorf("у пользователя уже есть черновик"))
+		return
+	}
+
+	err = h.Repository.CreateDraftFlightService(
+		ctx.PostForm("name"),
+		ctx.PostForm("image_url"),
+		ctx.PostForm("video_url"),
+	)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.Redirect(http.StatusFound, "/flight-draft")
 }

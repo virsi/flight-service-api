@@ -14,37 +14,65 @@
     </header>
 
     <div class="form">
-      <p class="section-title">Изображение</p>
-      <div class="upload">
-        <img src="{{ .flightService.ImageURL }}" alt="{{ .flightService.Name }}">
-      </div>
+      {{ if .flightService }}
+      <form action="/flight-publish" method="POST">
+        <p class="section-title">Изображение</p>
+        <div class="upload">
+          <img src="{{ .flightService.ImageURL }}" alt="{{ .flightService.Name }}">
+        </div>
 
-      <p class="section-title">Видео</p>
-      <div class="upload">
-        <video src="{{ .flightService.VideoURL }}" controls></video>
-      </div>
+        <p class="section-title">Видео</p>
+        <div class="upload">
+          <video src="{{ .flightService.VideoURL }}" controls></video>
+        </div>
 
-      <p class="section-title">Текст</p>
-      <div class="field">
-        <label>Название</label>
-        <input type="text" value="{{ .flightService.Name }}">
-      </div>
-      <div class="field">
-        <label>Краткое описание</label>
-        <input type="text" value="{{ .flightService.Description }}">
-      </div>
-
-      <p class="section-title">Параметры</p>
-      <div class="field-row">
+        <p class="section-title">Текст</p>
         <div class="field">
-          <label>Единица измерения</label>
-          <input type="text" value="{{ .flightService.Unit }}">
+          <label>Название</label>
+          <input type="text" value="{{ .flightService.Name }}" readonly>
         </div>
         <div class="field">
-          <label>Цена</label>
-          <input type="number" value="{{ .flightService.Price }}">
+          <label>Краткое описание</label>
+          <input type="text" name="description" value="{{ .flightService.Description }}" required>
         </div>
-      </div>
+
+        <p class="section-title">Параметры</p>
+        <div class="field-row">
+          <div class="field">
+            <label>Единица измерения</label>
+            <input type="text" name="unit" value="{{ .flightService.Unit }}" required>
+          </div>
+          <div class="field">
+            <label>Цена</label>
+            <input type="number" step="0.01" name="price" value="{{ .flightService.Price }}" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">Опубликовать</button>
+      </form>
+      {{ else }}
+      <form action="/flight-draft" method="POST">
+        <p class="section-title">Изображение</p>
+        <div class="field">
+          <label>URL изображения</label>
+          <input type="text" name="image_url" required>
+        </div>
+
+        <p class="section-title">Видео</p>
+        <div class="field">
+          <label>URL видео</label>
+          <input type="text" name="video_url" required>
+        </div>
+
+        <p class="section-title">Текст</p>
+        <div class="field">
+          <label>Название</label>
+          <input type="text" name="name" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Далее</button>
+      </form>
+      {{ end }}
     </div>
 
     <nav class="tabbar">

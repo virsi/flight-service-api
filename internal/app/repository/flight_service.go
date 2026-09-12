@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -119,4 +120,18 @@ func (r *Repository) GetLikesCount(flightServiceID uint) (int64, error) {
 		Where("flight_service_id = ?", flightServiceID).Count(&count).Error
 
 	return count, err
+}
+
+// CreateDraftFlightService — создание черновика по кнопке «Далее» (ORM)
+func (r *Repository) CreateDraftFlightService(name, imageURL, videoURL string) error {
+	service := ds.FlightService{
+		Name:      name,
+		ImageURL:  imageURL,
+		VideoURL:  videoURL,
+		Status:    StatusDraft,
+		CreatorID: CreatorID,
+		CreatedAt: time.Now(),
+	}
+
+	return r.db.Create(&service).Error
 }

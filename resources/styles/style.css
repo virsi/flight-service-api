@@ -198,3 +198,16 @@ body {
 .field-row { display: flex; gap: 12px; }
 .field-row .field { flex: 1; }
 .note { font-size: 11px; color: var(--disabled); margin: 8px 0 0; }
+.btn-primary {
+  display: block;
+  width: 100%;
+  margin: 16px 0 0;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--blue);
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
