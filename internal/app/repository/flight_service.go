@@ -14,6 +14,11 @@ const (
 	StatusDeleted   = "удален"
 )
 
+// ErrFlightServiceNotFound — услуга не найдена. Репозиторий переводит в неё
+// ошибку GORM, чтобы слой обработчиков отличал «нет записи» от сбоя БД,
+// ничего не зная про ORM.
+var ErrFlightServiceNotFound = errors.New("услуга не найдена")
+
 // GetPublishedFlightServices — список опубликованных услуг (ORM)
 func (r *Repository) GetPublishedFlightServices() ([]ds.FlightService, error) {
 	var services []ds.FlightService
@@ -41,6 +46,9 @@ func (r *Repository) GetFlightServicesByPrice(maxPrice float64) ([]ds.FlightServ
 func (r *Repository) GetFlightService(id uint) (ds.FlightService, error) {
 	var service ds.FlightService
 	err := r.db.Where("id = ? AND status <> ?", id, StatusDeleted).First(&service).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return ds.FlightService{}, ErrFlightServiceNotFound
+	}
 	if err != nil {
 		return ds.FlightService{}, err
 	}
@@ -56,6 +64,9 @@ func (r *Repository) GetNextFlightServiceID(id uint) (uint, error) {
 		Order("id").First(&service).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		err = r.db.Where("status = ?", StatusPublished).Order("id").First(&service).Error
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, ErrFlightServiceNotFound
 	}
 	if err != nil {
 		return 0, err

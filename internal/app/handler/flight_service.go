@@ -1,17 +1,28 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"flight-service-api/internal/app/ds"
+	"flight-service-api/internal/app/repository"
 )
 
 type flightServiceView struct {
 	FlightService ds.FlightService
 	LikesCount    int64
+}
+
+// statusForError различает «услуги нет» (404) и настоящую ошибку БД (500)
+func statusForError(err error) int {
+	if errors.Is(err, repository.ErrFlightServiceNotFound) {
+		return http.StatusNotFound
+	}
+
+	return http.StatusInternalServerError
 }
 
 // GetFlightServices — плитка карточек с фильтрацией по цене
@@ -71,7 +82,7 @@ func (h *Handler) GetFlightFeed(ctx *gin.Context) {
 	if id == 0 || ctx.Query("next") == "true" {
 		next, err := h.Repository.GetNextFlightServiceID(id)
 		if err != nil {
-			h.errorHandler(ctx, http.StatusNotFound, err)
+			h.errorHandler(ctx, statusForError(err), err)
 			return
 		}
 		id = next
@@ -79,7 +90,7 @@ func (h *Handler) GetFlightFeed(ctx *gin.Context) {
 
 	service, err := h.Repository.GetFlightService(id)
 	if err != nil {
-		h.errorHandler(ctx, http.StatusNotFound, err)
+		h.errorHandler(ctx, statusForError(err), err)
 		return
 	}
 
