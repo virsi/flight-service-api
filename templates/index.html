@@ -25,7 +25,7 @@
 
     <div class="grid">
       {{ range .flightServices }}
-      <a class="card" href="/flight-resource/{{ .FlightService.ID }}">
+      <a class="card" href="/flight-feed/{{ .FlightService.ID }}">
         <img src="{{ .FlightService.ImageURL }}" alt="{{ .FlightService.Name }}">
         <div class="card-body">
           <p class="name">{{ .FlightService.Name }}</p>

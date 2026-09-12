@@ -1,15 +1,31 @@
 package main
 
 import (
-	"log"
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 
-	"flight-service-api/internal/api"
+	"flight-service-api/internal/app/config"
+	"flight-service-api/internal/app/dsn"
+	"flight-service-api/internal/app/handler"
+	"flight-service-api/internal/app/repository"
+	"flight-service-api/internal/pkg"
 )
 
 func main() {
-	log.Println("Application start!")
+	router := gin.Default()
 
-	api.StartServer()
+	conf, err := config.NewConfig()
+	if err != nil {
+		logrus.Fatalf("error loading config: %v", err)
+	}
 
-	log.Println("Application terminated!")
+	rep, err := repository.New(dsn.FromEnv())
+	if err != nil {
+		logrus.Fatalf("error initializing repository: %v", err)
+	}
+
+	hand := handler.NewHandler(rep)
+
+	application := pkg.NewApp(conf, router, hand)
+	application.RunApp()
 }

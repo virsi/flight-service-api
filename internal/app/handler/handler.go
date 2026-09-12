@@ -1,9 +1,6 @@
 package handler
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
@@ -15,103 +12,28 @@ type Handler struct {
 }
 
 func NewHandler(r *repository.Repository) *Handler {
-	return &Handler{
-		Repository: r,
-	}
+	return &Handler{Repository: r}
 }
 
-type flightServiceView struct {
-	FlightService repository.FlightService
-	LikesCount    int
+// RegisterHandler регистрирует маршруты приложения
+func (h *Handler) RegisterHandler(router *gin.Engine) {
+	router.GET("/flight-resources", h.GetFlightServices)
+	router.GET("/flight-feed", h.GetFlightFeed)
+	router.GET("/flight-feed/:id", h.GetFlightFeed)
+	router.GET("/flight-draft", h.GetFlightDraft)
 }
 
-func toFlightServiceViews(services []repository.FlightService) []flightServiceView {
-	views := make([]flightServiceView, 0, len(services))
-	for _, res := range services {
-		views = append(views, flightServiceView{
-			FlightService: res,
-			LikesCount:    len(res.Likes),
-		})
-	}
-	return views
+// RegisterStatic регистрирует шаблоны и статику
+func (h *Handler) RegisterStatic(router *gin.Engine) {
+	router.LoadHTMLGlob("templates/*")
+	router.Static("/static", "./resources")
 }
 
-func (h *Handler) GetFlightServices(ctx *gin.Context) {
-	var services []repository.FlightService
-	var err error
-
-	priceQuery := ctx.Query("price")
-	if priceQuery == "" {
-		services, err = h.Repository.GetPublishedFlightServices()
-		if err != nil {
-			logrus.Error(err)
-		}
-	} else {
-		maxPrice, parseErr := strconv.ParseFloat(priceQuery, 64)
-		if parseErr != nil {
-			logrus.Error(parseErr)
-		}
-		services, err = h.Repository.GetFlightServicesByPrice(maxPrice)
-		if err != nil {
-			logrus.Error(err)
-		}
-	}
-
-	ctx.HTML(http.StatusOK, "index.html", gin.H{
-		"flightServices": toFlightServiceViews(services),
-		"price":          priceQuery,
-	})
-}
-
-func (h *Handler) GetFlightService(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	if ctx.Query("next") == "true" {
-		id, err = h.Repository.GetNextFlightServiceID(id)
-		if err != nil {
-			logrus.Error(err)
-		}
-	}
-
-	service, err := h.Repository.GetFlightService(id)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	ctx.HTML(http.StatusOK, "feed.html", gin.H{
-		"flightService": service,
-		"likesCount":    len(service.Likes),
-	})
-}
-
-func (h *Handler) GetFlightFeed(ctx *gin.Context) {
-	id, err := h.Repository.GetNextFlightServiceID(0)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	service, err := h.Repository.GetFlightService(id)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	ctx.HTML(http.StatusOK, "feed.html", gin.H{
-		"flightService": service,
-		"likesCount":    len(service.Likes),
-	})
-}
-
-func (h *Handler) GetFlightDraft(ctx *gin.Context) {
-	draft, err := h.Repository.GetDraftFlightService()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	ctx.HTML(http.StatusOK, "add.html", gin.H{
-		"flightService": draft,
+// errorHandler для более удобного вывода ошибок
+func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
+	logrus.Error(err.Error())
+	ctx.JSON(errorStatusCode, gin.H{
+		"status":      "error",
+		"description": err.Error(),
 	})
 }

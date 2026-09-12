@@ -12,3 +12,6 @@
 # Go
 vendor/
 *.test
+
+# SDD scratch
+.superpowers/
