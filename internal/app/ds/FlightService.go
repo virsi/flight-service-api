@@ -15,7 +15,6 @@ type FlightService struct {
 	VideoURL    string       `gorm:"type:varchar(200)"`
 	Unit        string       `gorm:"type:varchar(20)"`
 	Price       float64      `gorm:"type:numeric(10,2)"`
-	Category    string       `gorm:"type:varchar(30)"`
 	CreatedAt   time.Time    `gorm:"not null"`
 	CreatorID   uint         `gorm:"not null"`
 	FormedAt    sql.NullTime `gorm:"default:null"`
