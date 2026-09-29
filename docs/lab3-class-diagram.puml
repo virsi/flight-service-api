@@ -1,0 +1,207 @@
+@startuml lab3-class-diagram
+title ЛР3: диаграмма классов flight-service-api
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "Frontend (4 страницы)" {
+  class "Список услуг" as PageList <<page>> {
+    плитка, фильтр по цене
+    лайк, удаление своей услуги
+  }
+  class "Лента" as PageFeed <<page>> {
+    просмотр по одной услуге
+    лайк
+  }
+  class "Добавление услуги" as PageAdd <<page>> {
+    форма с файлами image и video
+    черновик, публикация
+  }
+  class "Регистрация / вход" as PageAuth <<page>> {
+    регистрация
+    вход и выход (заглушки)
+  }
+}
+
+package "Домен услуг /api/flight-services" {
+  interface FlightServiceAPI <<REST>> {
+    + GET /api/flight-services?price : FlightService[]
+    + GET /api/flight-services/feed : FlightService
+    + GET /api/flight-services/:id?next : FlightService
+    + GET /api/flight-services/draft : FlightService
+    + POST /api/flight-services (multipart) : FlightService
+    + PUT /api/flight-services/draft/publish : FlightService
+    + DELETE /api/flight-services/:id : message
+    + POST /api/flight-services/:id/like : like, likes_count
+  }
+}
+
+package "Домен пользователя /api/users" {
+  interface UserAPI <<REST>> {
+    + POST /api/users/register : User
+    + POST /api/users/login : заглушка
+    + POST /api/users/logout : заглушка
+  }
+}
+
+package "handler" {
+  class Handler {
+    + Repository : *Repository
+    + RegisterHandler(router)
+    + RegisterStatic(router)
+    + GetFlightServicesAPI(ctx)
+    + GetFlightFeedAPI(ctx)  // и /feed, и /:id
+    + GetFlightDraftAPI(ctx)
+    + CreateFlightServiceAPI(ctx)
+    + PublishFlightServiceAPI(ctx)
+    + DeleteFlightServiceAPI(ctx)
+    + LikeFlightServiceAPI(ctx)
+    + RegisterAPI(ctx)
+    + LoginAPI(ctx)
+    + LogoutAPI(ctx)
+    + GetFlightServices(ctx) : HTML
+    + GetFlightFeed(ctx) : HTML
+    + GetFlightDraft(ctx) : HTML
+    + CreateFlightDraft(ctx) : HTML
+    + PublishFlightService(ctx) : HTML
+    + DeleteFlightService(ctx) : HTML
+    - errorHandler(ctx, code, err)
+  }
+  class "CurrentUserID()" as CurrentUser <<singleton, id = 1>> {
+    + CurrentUserID() : uint
+  }
+}
+
+package "repository" {
+  class Repository {
+    + GetPublishedFlightServices() : []FlightService
+    + GetFlightServicesByPrice(maxPrice) : []FlightService
+    + GetFlightService(id) : FlightService
+    + GetNextFlightServiceID(id) : uint
+    + GetDraftFlightService(userID) : *FlightService
+    + GetLikesCounts() : map[uint]int64
+    + GetLikesCount(flightServiceID) : int64
+    + CreateDraftFlightService(service, userID)
+    + PublishFlightService(userID, description, unit, price)
+    + PublishDraftFlightService(userID) : FlightService
+    + DeleteFlightService(id, userID)
+    + SetLike(serviceID, userID, like) : int64
+    + CreateUser(login, password) : User
+    + MediaURL(name) : string
+    + UploadMedia(header, kind) : string
+    + RemoveMedia(name)
+  }
+}
+
+package "ds (модели GORM)" {
+  class "ds.FlightService" as DsFlightService {
+    + ID : uint
+    + Name : string
+    + Description : string
+    + Status : string
+    + Image : string
+    + Video : string
+    + Unit : string
+    + Price : float64
+    + CreatorID : uint
+    + FormedAt : sql.NullTime
+  }
+  class "ds.User" as DsUser {
+    + ID : uint
+    + Login : string
+    + Password : string
+    + IsModerator : bool
+  }
+  class "ds.FlightServiceLike" as DsLike {
+    + ID : uint
+    + UserID : uint
+    + FlightServiceID : uint
+  }
+}
+
+package "serializer (ответы клиенту)" {
+  class "serializer.FlightService" as SerFlightService {
+    + ID, Name, Description, Status : ...
+    + Unit : string
+    + Price : float64
+    + ImageURL : string
+    + VideoURL : string
+    + FormedAt : *time.Time
+    + LikesCount : int64
+    + IsMine : int
+  }
+  class "serializer.User" as SerUser {
+    + ID : uint
+    + Login : string
+    + IsModerator : bool
+  }
+}
+
+package "БД PostgreSQL" {
+  entity flight_services <<table>> {
+    * id : bigint <<PK>>
+    * name : varchar(100)
+    description : varchar(255)
+    * status : varchar(15)
+    image : varchar(200)
+    video : varchar(200)
+    unit : varchar(20)
+    price : numeric(10,2)
+    * creator_id : bigint <<FK users>>
+    formed_at : timestamptz
+  }
+  entity users <<table>> {
+    * id : bigint <<PK>>
+    * login : varchar(25) <<unique>>
+    * password : varchar(100)
+    is_moderator : boolean
+  }
+  entity flight_service_likes <<table>> {
+    * id : bigint <<PK>>
+    * user_id : bigint <<FK users>>
+    * flight_service_id : bigint <<FK flight_services>>
+  }
+}
+
+package "MinIO" {
+  class "бакет flight-media" as Bucket <<storage>> {
+    image-HEX.jpg
+    video-HEX.mp4
+  }
+}
+
+' страницы -> домены
+PageList ..> FlightServiceAPI : GET список, лайк, удаление
+PageFeed ..> FlightServiceAPI : лента, лайк
+PageAdd ..> FlightServiceAPI : черновик, добавление, публикация
+PageAuth ..> UserAPI : register, login, logout
+
+' реализация интерфейсов
+Handler ..|> FlightServiceAPI
+Handler ..|> UserAPI
+Handler ..> CurrentUser : id пользователя
+Handler --> Repository
+
+' домены -> модели и сериализаторы
+FlightServiceAPI ..> SerFlightService
+FlightServiceAPI ..> DsFlightService
+UserAPI ..> SerUser
+UserAPI ..> DsUser
+SerFlightService ..> DsFlightService : собирается из
+SerUser ..> DsUser : собирается из
+
+' Repository -> модели, MinIO
+Repository ..> DsFlightService
+Repository ..> DsUser
+Repository ..> DsLike
+Repository ..> Bucket : UploadMedia, RemoveMedia
+
+' модели -> таблицы
+DsFlightService ..> flight_services
+DsUser ..> users
+DsLike ..> flight_service_likes
+
+' связи таблиц
+flight_services }o--|| users : creator_id
+flight_service_likes }o--|| users : user_id
+flight_service_likes }o--|| flight_services : flight_service_id
+@enduml

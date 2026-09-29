@@ -18,8 +18,8 @@
       <form action="/flight-publish" method="POST">
         <p class="section-title">Изображение</p>
         <div class="upload">
-          {{ if .flightService.ImageURL }}
-          <img src="{{ .flightService.ImageURL }}" alt="{{ .flightService.Name }}">
+          {{ if .flightService.Image }}
+          <img src="{{ media .flightService.Image }}" alt="{{ .flightService.Name }}">
           {{ else }}
           <img src="/static/media/default.jpg" alt="{{ .flightService.Name }}">
           {{ end }}
@@ -27,8 +27,8 @@
 
         <p class="section-title">Видео</p>
         <div class="upload">
-          {{ if .flightService.VideoURL }}
-          <video src="{{ .flightService.VideoURL }}" controls></video>
+          {{ if .flightService.Video }}
+          <video src="{{ media .flightService.Video }}" controls></video>
           {{ else }}
           <video src="/static/media/default.mp4" controls></video>
           {{ end }}

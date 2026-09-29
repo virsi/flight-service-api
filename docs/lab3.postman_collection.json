@@ -1,0 +1,515 @@
+{
+  "info": {
+    "name": "ЛР3 flight-service-api",
+    "description": "REST API услуг обслуживания рейса. Запросы расположены в порядке показа на защите. Пользователь зафиксирован (id = 1).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Подготовка: опубликовать текущий черновик",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/flight-services/draft/publish",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "flight-services",
+            "draft",
+            "publish"
+          ]
+        },
+        "description": "Выполнить один раз перед показом: в демо-состоянии БД у пользователя уже есть черновик 9, а черновик может быть только один. После этого запросы 1–11 выполняются подряд без ошибок. Если черновика нет — 404, это нормально."
+      },
+      "response": []
+    },
+    {
+      "name": "1. Список услуг (фильтр)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/flight-services?price=10000",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "flight-services"
+          ],
+          "query": [
+            {
+              "key": "price",
+              "value": "10000"
+            }
+          ]
+        },
+        "description": "Только опубликованные услуги; price — максимальная цена. У каждой услуги is_mine = 0|1."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Добавить услугу с картинкой и видео",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/flight-services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "flight-services"
+          ]
+        },
+        "description": "Создаёт ЧЕРНОВИК (multipart/form-data). Файлы image и video выбираются в Postman вручную (Body -> form-data). Поля id, status, creator_id не принимаются. 201; если у пользователя уже есть черновик — 409 (бизнес-правило: не более одного черновика). Перед ним выполните запрос 0 (публикация имеющегося черновика 9). Новая услуга получит id 10 — он используется в запросе 8.",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "Трап пассажирский",
+              "type": "text"
+            },
+            {
+              "key": "description",
+              "value": "Подача трапа к воздушному судну.",
+              "type": "text"
+            },
+            {
+              "key": "unit",
+              "value": "час",
+              "type": "text"
+            },
+            {
+              "key": "price",
+              "value": "6500",
+              "type": "text"
+            },
+            {
+              "key": "image",
+              "type": "file",
+              "src": []
+            },
+            {
+              "key": "video",
+              "type": "file",
+              "src": []
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Черновик",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/flight-services/draft",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "flight-services",
+            "draft"
+          ]
+        },
+        "description": "Черновик текущего пользователя (id = 1) без указания id. 404, если черновика нет. После запроса 2 вернёт созданную им услугу."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Опубликовать черновик",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/flight-services/draft/publish",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "flight-services",
+            "draft",
+            "publish"
+          ]
+        },
+        "description": "Меняет статус черновик -> опубликован и ставит formed_at, тела нет. 404, если черновика нет. Публикует услугу, созданную запросом 2."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Лента без id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/flight-services/feed",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "flight-services",
+            "feed"
+          ]
+        },
+        "description": "Первая опубликованная услуга. 404, если опубликованных нет."
+      },
+      "response": []
+    },
+    {
+      "name": "6. Лента по id (next)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/flight-services/1?next=true",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "flight-services",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "next",
+              "value": "true"
+            }
+          ]
+        },
+        "description": "Услуга по id; с next=true — следующая опубликованная по кругу. Удалённые и черновики не отдаются (404)."
+      },
+      "response": []
+    },
+    {
+      "name": "7. Лайк",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/flight-services/1/like",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "flight-services",
+            "1",
+            "like"
+          ]
+        },
+        "description": "like = 1 ставит лайк, 0 снимает. Ответ: like и likes_count. 400 при других значениях, 404 если услуги нет.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"like\": 1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "8. Удалить услугу",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/flight-services/10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "flight-services",
+            "10"
+          ]
+        },
+        "description": "Логическое удаление (статус -> удален), только своих услуг. Id 10 — услуга, созданная запросом 2 в демо-состоянии БД (после запроса 0); если id другой, подставьте id из ответа запроса 2 (data.id). Чужая услуга -> 403, нет/уже удалена -> 404."
+      },
+      "response": []
+    },
+    {
+      "name": "9. Регистрация",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/users/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "register"
+          ]
+        },
+        "description": "Настоящая регистрация: принимаются только login и password; is_moderator и id вычисляются на бэкенде. 201; 409 при занятом логине; 400 при пустых/слишком длинных полях. Повторный запуск с тем же логином вернёт 409.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"login\":\"new_dispatcher\",\"password\":\"secret\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10. Аутентификация (заглушка)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/users/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "login"
+          ]
+        },
+        "description": "Заглушка, реализация — в ЛР4. Всегда 200."
+      },
+      "response": []
+    },
+    {
+      "name": "11. Деавторизация (заглушка)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/users/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "logout"
+          ]
+        },
+        "description": "Заглушка, реализация — в ЛР4. Всегда 200."
+      },
+      "response": []
+    },
+    {
+      "name": "Ошибки",
+      "item": [
+        {
+          "name": "GET id = -1 (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/flight-services/-1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "flight-services",
+                "-1"
+              ]
+            },
+            "description": "id не число без знака -> 400."
+          },
+          "response": []
+        },
+        {
+          "name": "GET id = 999999999999 (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/flight-services/999999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "flight-services",
+                "999999999999"
+              ]
+            },
+            "description": "Услуги нет -> 404."
+          },
+          "response": []
+        },
+        {
+          "name": "GET id = 6 (404, удалена)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/flight-services/6",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "flight-services",
+                "6"
+              ]
+            },
+            "description": "Удалённые услуги клиенту не передаются -> 404."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE чужой услуги id = 3 (403)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/flight-services/3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "flight-services",
+                "3"
+              ]
+            },
+            "description": "Услуга 3 создана другим пользователем -> 403."
+          },
+          "response": []
+        },
+        {
+          "name": "Повторный POST добавления (409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/flight-services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "flight-services"
+              ]
+            },
+            "description": "Если черновик уже есть (например, после запроса 2 без публикации) -> 409. Выберите файлы вручную или отправьте без них (они необязательны).",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Дубликат черновика",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "video",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Лайк like = 5 (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/flight-services/1/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "flight-services",
+                "1",
+                "like"
+              ]
+            },
+            "description": "like допускает только 0 или 1 -> 400.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"like\": 5}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET ?price=abc (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/flight-services?price=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "flight-services"
+              ],
+              "query": [
+                {
+                  "key": "price",
+                  "value": "abc"
+                }
+              ]
+            },
+            "description": "price не число -> 400."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

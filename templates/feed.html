@@ -8,8 +8,8 @@
 </head>
 <body>
   <div class="app app-feed">
-    {{ if .flightService.VideoURL }}
-    <video class="feed-video" src="{{ .flightService.VideoURL }}" autoplay muted loop playsinline></video>
+    {{ if .flightService.Video }}
+    <video class="feed-video" src="{{ media .flightService.Video }}" autoplay muted loop playsinline></video>
     {{ else }}
     <video class="feed-video" src="/static/media/default.mp4" autoplay muted loop playsinline></video>
     {{ end }}

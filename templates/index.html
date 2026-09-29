@@ -31,8 +31,8 @@
       {{ range .flightServices }}
       <div class="card-wrap">
         <a class="card" href="/flight-feed?id={{ .FlightService.ID }}">
-          {{ if .FlightService.ImageURL }}
-          <img src="{{ .FlightService.ImageURL }}" alt="{{ .FlightService.Name }}">
+          {{ if .FlightService.Image }}
+          <img src="{{ media .FlightService.Image }}" alt="{{ .FlightService.Name }}">
           {{ else }}
           <img src="/static/media/default.jpg" alt="{{ .FlightService.Name }}">
           {{ end }}

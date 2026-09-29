@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"flight-service-api/internal/app/ds"
 )
@@ -18,6 +18,8 @@ const (
 )
 
 var ErrFlightServiceNotFound = errors.New("услуга не найдена")
+var ErrDraftExists = errors.New("у пользователя уже есть черновик")
+var ErrForbidden = errors.New("можно удалять только свои услуги")
 
 // GetPublishedFlightServices — список опубликованных услуг (ORM)
 func (r *Repository) GetPublishedFlightServices() ([]ds.FlightService, error) {
@@ -42,10 +44,10 @@ func (r *Repository) GetFlightServicesByPrice(maxPrice float64) ([]ds.FlightServ
 	return services, nil
 }
 
-// GetFlightService — одна услуга; удалённые просматривать нельзя (ORM)
+// GetFlightService — одна услуга ленты; только опубликованные (ORM)
 func (r *Repository) GetFlightService(id uint) (ds.FlightService, error) {
 	var service ds.FlightService
-	err := r.db.Where("id = ? AND status <> ?", id, StatusDeleted).First(&service).Error
+	err := r.db.Where("id = ? AND status = ?", id, StatusPublished).First(&service).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return ds.FlightService{}, ErrFlightServiceNotFound
 	}
@@ -76,9 +78,9 @@ func (r *Repository) GetNextFlightServiceID(id uint) (uint, error) {
 }
 
 // GetDraftFlightService — черновик текущего пользователя; nil, если его нет (ORM)
-func (r *Repository) GetDraftFlightService() (*ds.FlightService, error) {
+func (r *Repository) GetDraftFlightService(userID uint) (*ds.FlightService, error) {
 	var service ds.FlightService
-	err := r.db.Where("creator_id = ? AND status = ?", CreatorID, StatusDraft).First(&service).Error
+	err := r.db.Where("creator_id = ? AND status = ?", userID, StatusDraft).First(&service).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -121,21 +123,32 @@ func (r *Repository) GetLikesCount(flightServiceID uint) (int64, error) {
 	return count, err
 }
 
-// CreateDraftFlightService — создание черновика по кнопке «Далее» (ORM)
-func (r *Repository) CreateDraftFlightService(name string) error {
-	service := ds.FlightService{
-		Name:      name,
-		Status:    StatusDraft,
-		CreatorID: CreatorID,
+// CreateDraftFlightService — создание черновика (ORM); не более одного на пользователя
+func (r *Repository) CreateDraftFlightService(service *ds.FlightService, userID uint) error {
+	draft, err := r.GetDraftFlightService(userID)
+	if err != nil {
+		return err
+	}
+	if draft != nil {
+		return ErrDraftExists
 	}
 
-	return r.db.Create(&service).Error
+	service.Status = StatusDraft
+	service.CreatorID = userID
+
+	err = r.db.Create(service).Error
+	if errors.Is(err, gorm.ErrDuplicatedKey) {
+		// гонка: частичный уникальный индекс idx_one_draft_per_creator
+		return ErrDraftExists
+	}
+
+	return err
 }
 
 // PublishFlightService — публикация черновика по кнопке «Опубликовать» (ORM)
-func (r *Repository) PublishFlightService(description, unit string, price float64) error {
+func (r *Repository) PublishFlightService(userID uint, description, unit string, price float64) error {
 	res := r.db.Model(&ds.FlightService{}).
-		Where("creator_id = ? AND status = ?", CreatorID, StatusDraft).
+		Where("creator_id = ? AND status = ?", userID, StatusDraft).
 		Updates(map[string]interface{}{
 			"description": description,
 			"unit":        unit,
@@ -153,20 +166,73 @@ func (r *Repository) PublishFlightService(description, unit string, price float6
 	return nil
 }
 
-// DeleteFlightService — логическое удаление: SQL UPDATE через курсор, без ORM
-func (r *Repository) DeleteFlightService(id uint) error {
-	query := `UPDATE flight_services SET status = $1 WHERE id = $2 AND status <> $1 RETURNING id`
+// PublishDraftFlightService — публикация черновика без изменения полей (ORM)
+func (r *Repository) PublishDraftFlightService(userID uint) (ds.FlightService, error) {
+	service, err := r.GetDraftFlightService(userID)
+	if err != nil {
+		return ds.FlightService{}, err
+	}
+	if service == nil {
+		return ds.FlightService{}, ErrFlightServiceNotFound
+	}
 
-	// Создание курсора (строковый указатель)
-	row := r.db.Raw(query, StatusDeleted, id).Row()
+	res := r.db.Model(service).
+		Where("creator_id = ? AND status = ?", userID, StatusDraft).
+		Updates(map[string]interface{}{"status": StatusPublished, "formed_at": time.Now()})
+	if res.Error != nil {
+		return ds.FlightService{}, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return ds.FlightService{}, ErrFlightServiceNotFound
+	}
 
-	var deletedID uint
-	if err := row.Scan(&deletedID); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("услуга %d не найдена или уже удалена", id)
-		}
+	return *service, nil
+}
+
+// DeleteFlightService — логическое удаление своей услуги (ORM)
+func (r *Repository) DeleteFlightService(id, userID uint) error {
+	var service ds.FlightService
+	err := r.db.Where("id = ? AND status <> ?", id, StatusDeleted).First(&service).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return ErrFlightServiceNotFound
+	}
+	if err != nil {
 		return err
+	}
+	if service.CreatorID != userID {
+		return ErrForbidden
+	}
+
+	res := r.db.Model(&ds.FlightService{}).
+		Where("id = ? AND status <> ?", id, StatusDeleted).
+		Update("status", StatusDeleted)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return ErrFlightServiceNotFound
 	}
 
 	return nil
+}
+
+// SetLike — поставить или снять лайк пользователя, вернуть число лайков (ORM)
+func (r *Repository) SetLike(serviceID, userID uint, like bool) (int64, error) {
+	if _, err := r.GetFlightService(serviceID); err != nil {
+		return 0, err
+	}
+
+	var err error
+	if like {
+		err = r.db.Clauses(clause.OnConflict{DoNothing: true}).
+			Create(&ds.FlightServiceLike{UserID: userID, FlightServiceID: serviceID}).Error
+	} else {
+		err = r.db.Where("user_id = ? AND flight_service_id = ?", userID, serviceID).
+			Delete(&ds.FlightServiceLike{}).Error
+	}
+	if err != nil {
+		return 0, err
+	}
+
+	return r.GetLikesCount(serviceID)
 }
