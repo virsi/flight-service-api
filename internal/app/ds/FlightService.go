@@ -1,9 +1,6 @@
 package ds
 
-import (
-	"database/sql"
-	"time"
-)
+import "database/sql"
 
 // FlightService — услуга обслуживания рейса (ресурс, персонал, техника)
 type FlightService struct {
@@ -15,7 +12,6 @@ type FlightService struct {
 	VideoURL    string       `gorm:"type:varchar(200)"`
 	Unit        string       `gorm:"type:varchar(20)"`
 	Price       float64      `gorm:"type:numeric(10,2)"`
-	CreatedAt   time.Time    `gorm:"not null"`
 	CreatorID   uint         `gorm:"not null"`
 	FormedAt    sql.NullTime `gorm:"default:null"`
 

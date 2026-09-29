@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -15,9 +17,6 @@ const (
 	StatusDeleted   = "удален"
 )
 
-// ErrFlightServiceNotFound — услуга не найдена. Репозиторий переводит в неё
-// ошибку GORM, чтобы слой обработчиков отличал «нет записи» от сбоя БД,
-// ничего не зная про ORM.
 var ErrFlightServiceNotFound = errors.New("услуга не найдена")
 
 // GetPublishedFlightServices — список опубликованных услуг (ORM)
@@ -123,15 +122,51 @@ func (r *Repository) GetLikesCount(flightServiceID uint) (int64, error) {
 }
 
 // CreateDraftFlightService — создание черновика по кнопке «Далее» (ORM)
-func (r *Repository) CreateDraftFlightService(name, imageURL, videoURL string) error {
+func (r *Repository) CreateDraftFlightService(name string) error {
 	service := ds.FlightService{
 		Name:      name,
-		ImageURL:  imageURL,
-		VideoURL:  videoURL,
 		Status:    StatusDraft,
 		CreatorID: CreatorID,
-		CreatedAt: time.Now(),
 	}
 
 	return r.db.Create(&service).Error
+}
+
+// PublishFlightService — публикация черновика по кнопке «Опубликовать» (ORM)
+func (r *Repository) PublishFlightService(description, unit string, price float64) error {
+	res := r.db.Model(&ds.FlightService{}).
+		Where("creator_id = ? AND status = ?", CreatorID, StatusDraft).
+		Updates(map[string]interface{}{
+			"description": description,
+			"unit":        unit,
+			"price":       price,
+			"status":      StatusPublished,
+			"formed_at":   time.Now(),
+		})
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return fmt.Errorf("черновик не найден")
+	}
+
+	return nil
+}
+
+// DeleteFlightService — логическое удаление: SQL UPDATE через курсор, без ORM
+func (r *Repository) DeleteFlightService(id uint) error {
+	query := `UPDATE flight_services SET status = $1 WHERE id = $2 AND status <> $1 RETURNING id`
+
+	// Создание курсора (строковый указатель)
+	row := r.db.Raw(query, StatusDeleted, id).Row()
+
+	var deletedID uint
+	if err := row.Scan(&deletedID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("услуга %d не найдена или уже удалена", id)
+		}
+		return err
+	}
+
+	return nil
 }

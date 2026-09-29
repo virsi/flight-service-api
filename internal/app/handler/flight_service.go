@@ -90,8 +90,13 @@ func (h *Handler) GetFlightFeed(ctx *gin.Context) {
 	}
 
 	service, err := h.Repository.GetFlightService(id)
+	if errors.Is(err, repository.ErrFlightServiceNotFound) {
+		// удалённой или несуществующей услуги нет — просто возвращаем в ленту
+		ctx.Redirect(http.StatusFound, "/flight-feed")
+		return
+	}
 	if err != nil {
-		h.errorHandler(ctx, statusForError(err), err)
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -132,15 +137,48 @@ func (h *Handler) CreateFlightDraft(ctx *gin.Context) {
 		return
 	}
 
-	err = h.Repository.CreateDraftFlightService(
-		ctx.PostForm("name"),
-		ctx.PostForm("image_url"),
-		ctx.PostForm("video_url"),
-	)
+	err = h.Repository.CreateDraftFlightService(ctx.PostForm("name"))
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	ctx.Redirect(http.StatusFound, "/flight-draft")
+}
+
+// PublishFlightService — кнопка «Опубликовать»: смена статуса черновика
+func (h *Handler) PublishFlightService(ctx *gin.Context) {
+	price, err := strconv.ParseFloat(ctx.PostForm("price"), 64)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	err = h.Repository.PublishFlightService(
+		ctx.PostForm("description"),
+		ctx.PostForm("unit"),
+		price,
+	)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.Redirect(http.StatusFound, "/flight-resources")
+}
+
+// DeleteFlightService — логическое удаление услуги с плитки
+func (h *Handler) DeleteFlightService(ctx *gin.Context) {
+	id, err := strconv.ParseUint(ctx.PostForm("flight_service_id"), 10, 64)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = h.Repository.DeleteFlightService(uint(id)); err != nil {
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.Redirect(http.StatusFound, "/flight-resources")
 }

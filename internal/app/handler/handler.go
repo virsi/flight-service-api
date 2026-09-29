@@ -22,6 +22,8 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 	router.GET("/flight-feed/:id", h.GetFlightFeed)
 	router.GET("/flight-draft", h.GetFlightDraft)
 	router.POST("/flight-draft", h.CreateFlightDraft)
+	router.POST("/flight-publish", h.PublishFlightService)
+	router.POST("/flight-delete", h.DeleteFlightService)
 }
 
 // RegisterStatic регистрирует шаблоны и статику
