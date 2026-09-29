@@ -18,12 +18,20 @@
       <form action="/flight-publish" method="POST">
         <p class="section-title">Изображение</p>
         <div class="upload">
+          {{ if .flightService.ImageURL }}
           <img src="{{ .flightService.ImageURL }}" alt="{{ .flightService.Name }}">
+          {{ else }}
+          <img src="/static/media/default.jpg" alt="{{ .flightService.Name }}">
+          {{ end }}
         </div>
 
         <p class="section-title">Видео</p>
         <div class="upload">
+          {{ if .flightService.VideoURL }}
           <video src="{{ .flightService.VideoURL }}" controls></video>
+          {{ else }}
+          <video src="/static/media/default.mp4" controls></video>
+          {{ end }}
         </div>
 
         <p class="section-title">Текст</p>
@@ -54,14 +62,14 @@
       <form action="/flight-draft" method="POST">
         <p class="section-title">Изображение</p>
         <div class="field">
-          <label>URL изображения</label>
-          <input type="text" name="image_url" required>
+          <label>Фото</label>
+          <input type="file" accept="image/*">
         </div>
 
         <p class="section-title">Видео</p>
         <div class="field">
-          <label>URL видео</label>
-          <input type="text" name="video_url" required>
+          <label>Видео</label>
+          <input type="file" accept="video/*">
         </div>
 
         <p class="section-title">Текст</p>

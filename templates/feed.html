@@ -8,7 +8,11 @@
 </head>
 <body>
   <div class="app app-feed">
+    {{ if .flightService.VideoURL }}
     <video class="feed-video" src="{{ .flightService.VideoURL }}" autoplay muted loop playsinline></video>
+    {{ else }}
+    <video class="feed-video" src="/static/media/default.mp4" autoplay muted loop playsinline></video>
+    {{ end }}
 
     <div class="feed-overlay">
       <header class="feed-header">
@@ -25,7 +29,11 @@
           <a class="btn-next" href="/flight-feed/{{ .flightService.ID }}?next=true">→</a>
         </div>
         <h2 class="feed-name">{{ .flightService.Name }}</h2>
-        <p class="feed-desc">{{ .flightService.Description }} <a class="more" href="#">больше</a></p>
+        <div class="feed-desc-wrap">
+          <input type="checkbox" id="desc-more" class="desc-toggle">
+          <p class="feed-desc">{{ .flightService.Description }}</p>
+          <label for="desc-more" class="more">Ещё</label>
+        </div>
         <p class="feed-price">{{ .flightService.Price }} ₽/{{ .flightService.Unit }}</p>
       </div>
     </div>

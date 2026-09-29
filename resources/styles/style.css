@@ -70,6 +70,7 @@ body {
 .filter { display: flex; flex-direction: column; gap: 10px; padding: 8px 16px 16px; }
 .filter-slider { display: flex; flex-direction: column; gap: 6px; }
 .filter-slider label { font-size: 13px; color: var(--muted); }
+.scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
 .filter-slider input[type="range"] {
   width: 100%;
   accent-color: var(--blue);
@@ -77,7 +78,7 @@ body {
 .filter button {
   height: 44px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--blue);
   color: var(--white);
   font-size: 15px;
@@ -162,15 +163,19 @@ body {
   border-radius: 6px;
   margin-bottom: 10px;
 }
-.feed-desc { font-size: 14px; margin: 0 0 6px; }
-.feed-desc .more { color: var(--orange); text-decoration: none; }
+.feed-desc { font-size: 14px; margin: 0 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.desc-toggle { display: none; }
+.desc-toggle:checked + .feed-desc { display: block; -webkit-line-clamp: unset; }
+.feed-desc-wrap { margin: 0 0 6px; }
+.more { color: var(--orange); font-size: 13px; cursor: pointer; }
+.desc-toggle:checked ~ .more { display: none; }
 .feed-price { font-size: 18px; font-weight: 700; margin: 0; }
 
 /* Добавление: форма */
 .form { padding: 8px 16px 24px; }
 .section-title { font-size: 13px; font-weight: 500; color: var(--muted); margin: 0 0 8px; }
 .upload {
-  height: 90px;
+  height: 160px;
   border-radius: 12px;
   background: var(--bg);
   display: flex;
@@ -181,7 +186,7 @@ body {
   margin-bottom: 16px;
   overflow: hidden;
 }
-.upload img, .upload video { width: 100%; height: 100%; object-fit: cover; }
+.upload img, .upload video { width: 100%; height: 100%; object-fit: contain; }
 .field { margin-bottom: 14px; }
 .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
 .field input {
@@ -209,5 +214,19 @@ body {
   color: var(--white);
   font-size: 15px;
   font-weight: 600;
+  cursor: pointer;
+}
+.card-wrap { position: relative; }
+.card-wrap .card { display: block; height: 100%; }
+.card-delete { position: absolute; top: 8px; right: 8px; margin: 0; }
+.btn-delete {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: var(--blue);
+  color: var(--white);
+  font-size: 13px;
+  line-height: 1;
   cursor: pointer;
 }

@@ -15,24 +15,38 @@
 
     <form class="filter" action="/flight-resources" method="GET">
       <div class="filter-slider">
-        <label for="price">Цена до: <span id="price-value">{{ if .price }}{{ .price }}{{ else }}20000{{ end }} ₽</span></label>
+        <label for="price">Цена до: <span>{{ if .price }}{{ .price }}{{ else }}20000{{ end }} ₽</span></label>
         <input type="range" id="price" name="price" min="0" max="20000" step="100"
-               value="{{ if .price }}{{ .price }}{{ else }}20000{{ end }}"
-               oninput="document.getElementById('price-value').textContent = this.value + ' ₽'">
+               value="{{ if .price }}{{ .price }}{{ else }}20000{{ end }}" list="price-scale">
+        <datalist id="price-scale">
+          <option value="0"></option><option value="5000"></option><option value="10000"></option>
+          <option value="15000"></option><option value="20000"></option>
+        </datalist>
+        <div class="scale"><span>0</span><span>5000</span><span>10000</span><span>15000</span><span>20000</span></div>
       </div>
       <button type="submit">Найти</button>
     </form>
 
     <div class="grid">
       {{ range .flightServices }}
-      <a class="card" href="/flight-feed/{{ .FlightService.ID }}">
-        <img src="{{ .FlightService.ImageURL }}" alt="{{ .FlightService.Name }}">
-        <div class="card-body">
-          <p class="name">{{ .FlightService.Name }}</p>
-          <p class="price">{{ .FlightService.Price }} ₽/{{ .FlightService.Unit }}</p>
-          <span class="likes">♥ {{ .LikesCount }}</span>
-        </div>
-      </a>
+      <div class="card-wrap">
+        <a class="card" href="/flight-feed/{{ .FlightService.ID }}">
+          {{ if .FlightService.ImageURL }}
+          <img src="{{ .FlightService.ImageURL }}" alt="{{ .FlightService.Name }}">
+          {{ else }}
+          <img src="/static/media/default.jpg" alt="{{ .FlightService.Name }}">
+          {{ end }}
+          <div class="card-body">
+            <p class="name">{{ .FlightService.Name }}</p>
+            <p class="price">{{ .FlightService.Price }} ₽/{{ .FlightService.Unit }}</p>
+            <span class="likes">♥ {{ .LikesCount }}</span>
+          </div>
+        </a>
+        <form class="card-delete" action="/flight-delete" method="POST">
+          <input type="hidden" name="flight_service_id" value="{{ .FlightService.ID }}">
+          <button type="submit" class="btn-delete">✕</button>
+        </form>
+      </div>
       {{ end }}
     </div>
 
