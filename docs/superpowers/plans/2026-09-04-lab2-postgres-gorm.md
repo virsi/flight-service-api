@@ -622,6 +622,11 @@ const (
 	StatusDeleted   = "удален"
 )
 
+// ErrFlightServiceNotFound — услуга не найдена. Репозиторий переводит в неё
+// ошибку GORM, чтобы слой обработчиков отличал «нет записи» от сбоя БД,
+// ничего не зная про ORM.
+var ErrFlightServiceNotFound = errors.New("услуга не найдена")
+
 // GetPublishedFlightServices — список опубликованных услуг (ORM)
 func (r *Repository) GetPublishedFlightServices() ([]ds.FlightService, error) {
 	var services []ds.FlightService
@@ -649,6 +654,9 @@ func (r *Repository) GetFlightServicesByPrice(maxPrice float64) ([]ds.FlightServ
 func (r *Repository) GetFlightService(id uint) (ds.FlightService, error) {
 	var service ds.FlightService
 	err := r.db.Where("id = ? AND status <> ?", id, StatusDeleted).First(&service).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return ds.FlightService{}, ErrFlightServiceNotFound
+	}
 	if err != nil {
 		return ds.FlightService{}, err
 	}
@@ -664,6 +672,9 @@ func (r *Repository) GetNextFlightServiceID(id uint) (uint, error) {
 		Order("id").First(&service).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		err = r.db.Where("status = ?", StatusPublished).Order("id").First(&service).Error
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, ErrFlightServiceNotFound
 	}
 	if err != nil {
 		return 0, err
@@ -773,17 +784,28 @@ func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error)
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"flight-service-api/internal/app/ds"
+	"flight-service-api/internal/app/repository"
 )
 
 type flightServiceView struct {
 	FlightService ds.FlightService
 	LikesCount    int64
+}
+
+// statusForError различает «услуги нет» (404) и настоящую ошибку БД (500)
+func statusForError(err error) int {
+	if errors.Is(err, repository.ErrFlightServiceNotFound) {
+		return http.StatusNotFound
+	}
+
+	return http.StatusInternalServerError
 }
 
 // GetFlightServices — плитка карточек с фильтрацией по цене
@@ -843,7 +865,7 @@ func (h *Handler) GetFlightFeed(ctx *gin.Context) {
 	if id == 0 || ctx.Query("next") == "true" {
 		next, err := h.Repository.GetNextFlightServiceID(id)
 		if err != nil {
-			h.errorHandler(ctx, http.StatusNotFound, err)
+			h.errorHandler(ctx, statusForError(err), err)
 			return
 		}
 		id = next
@@ -851,7 +873,7 @@ func (h *Handler) GetFlightFeed(ctx *gin.Context) {
 
 	service, err := h.Repository.GetFlightService(id)
 	if err != nil {
-		h.errorHandler(ctx, http.StatusNotFound, err)
+		h.errorHandler(ctx, statusForError(err), err)
 		return
 	}
 
@@ -1050,7 +1072,7 @@ Expected: `404`
 - [ ] **Step 20: Проверить страницу черновика**
 
 Run: `curl -s http://localhost:8080/flight-draft | grep -c 'Багажный тягач'`
-Expected: `1` — на странице добавления открыт черновик из БД.
+Expected: `2` — на странице добавления открыт черновик из БД. Название встречается в двух строках шаблона `add.html`: в атрибуте `alt` изображения и в `value` поля ввода.
 
 - [ ] **Step 21: Commit**
 
