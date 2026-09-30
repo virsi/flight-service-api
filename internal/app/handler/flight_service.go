@@ -67,11 +67,11 @@ func (h *Handler) GetFlightServices(ctx *gin.Context) {
 	})
 }
 
-// GetFlightFeed — лента: /flight-feed и /flight-feed/:id (+ ?next=true)
+// GetFlightFeed — лента: /flight-feed (+ ?id=N, ?next=true)
 func (h *Handler) GetFlightFeed(ctx *gin.Context) {
 	var id uint
 
-	if idStr := ctx.Param("id"); idStr != "" {
+	if idStr := ctx.Query("id"); idStr != "" {
 		parsed, err := strconv.ParseUint(idStr, 10, 64)
 		if err != nil {
 			h.errorHandler(ctx, http.StatusBadRequest, err)

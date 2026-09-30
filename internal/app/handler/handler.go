@@ -19,7 +19,6 @@ func NewHandler(r *repository.Repository) *Handler {
 func (h *Handler) RegisterHandler(router *gin.Engine) {
 	router.GET("/flight-resources", h.GetFlightServices)
 	router.GET("/flight-feed", h.GetFlightFeed)
-	router.GET("/flight-feed/:id", h.GetFlightFeed)
 	router.GET("/flight-draft", h.GetFlightDraft)
 	router.POST("/flight-draft", h.CreateFlightDraft)
 	router.POST("/flight-publish", h.PublishFlightService)

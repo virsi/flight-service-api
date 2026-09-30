@@ -30,7 +30,7 @@
     <div class="grid">
       {{ range .flightServices }}
       <div class="card-wrap">
-        <a class="card" href="/flight-feed/{{ .FlightService.ID }}">
+        <a class="card" href="/flight-feed?id={{ .FlightService.ID }}">
           {{ if .FlightService.ImageURL }}
           <img src="{{ .FlightService.ImageURL }}" alt="{{ .FlightService.Name }}">
           {{ else }}
