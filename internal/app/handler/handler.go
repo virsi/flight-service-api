@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"html/template"
-
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
@@ -19,13 +17,6 @@ func NewHandler(r *repository.Repository) *Handler {
 
 // RegisterHandler регистрирует маршруты приложения
 func (h *Handler) RegisterHandler(router *gin.Engine) {
-	router.GET("/flight-resources", h.GetFlightServices)
-	router.GET("/flight-feed", h.GetFlightFeed)
-	router.GET("/flight-draft", h.GetFlightDraft)
-	router.POST("/flight-draft", h.CreateFlightDraft)
-	router.POST("/flight-publish", h.PublishFlightService)
-	router.POST("/flight-delete", h.DeleteFlightService)
-
 	api := router.Group("/api")
 	api.GET("/flight-services", h.GetFlightServicesAPI)
 	api.GET("/flight-services/feed", h.GetFlightFeedAPI)
@@ -38,13 +29,6 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 	api.POST("/users/register", h.RegisterAPI)
 	api.POST("/users/login", h.LoginAPI)
 	api.POST("/users/logout", h.LogoutAPI)
-}
-
-// RegisterStatic регистрирует шаблоны и статику
-func (h *Handler) RegisterStatic(router *gin.Engine) {
-	router.SetFuncMap(template.FuncMap{"media": h.Repository.MediaURL})
-	router.LoadHTMLGlob("templates/*")
-	router.Static("/static", "./resources")
 }
 
 // errorHandler для более удобного вывода ошибок

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -143,27 +142,6 @@ func (r *Repository) CreateDraftFlightService(service *ds.FlightService, userID 
 	}
 
 	return err
-}
-
-// PublishFlightService — публикация черновика по кнопке «Опубликовать» (ORM)
-func (r *Repository) PublishFlightService(userID uint, description, unit string, price float64) error {
-	res := r.db.Model(&ds.FlightService{}).
-		Where("creator_id = ? AND status = ?", userID, StatusDraft).
-		Updates(map[string]interface{}{
-			"description": description,
-			"unit":        unit,
-			"price":       price,
-			"status":      StatusPublished,
-			"formed_at":   time.Now(),
-		})
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected == 0 {
-		return fmt.Errorf("черновик не найден")
-	}
-
-	return nil
 }
 
 // PublishDraftFlightService — публикация черновика без изменения полей (ORM)

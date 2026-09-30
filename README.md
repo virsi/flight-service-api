@@ -13,9 +13,7 @@
 - Go + [Gin](https://github.com/gin-gonic/gin)
 - PostgreSQL + [GORM](https://gorm.io) (всё взаимодействие с БД — только через ORM)
 - MinIO (объектное хранилище изображений и видео)
-- Серверные шаблоны `html/template`
 - [logrus](https://github.com/sirupsen/logrus)
-- Палитра Aeroflot: `#041839` / `#10349E` / `#EF8A06`
 
 ## Запуск
 
@@ -53,20 +51,6 @@
    ```
 
 Переменные окружения (`.env`): параметры PostgreSQL (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`) и MinIO (`MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET`, `MINIO_PUBLIC_URL`).
-
-## HTML-страницы
-
-| Метод | URL | Описание |
-|---|---|---|
-| GET | `/flight-resources` | плитка опубликованных услуг, фильтр по цене `?price=` |
-| GET | `/flight-feed` | лента без id (первая опубликованная услуга) |
-| GET | `/flight-feed/:id` | лента по id, `?next=true` — следующая услуга |
-| GET | `/flight-draft` | страница добавления услуги (черновик) |
-| POST | `/flight-draft` | создание черновика |
-| POST | `/flight-publish` | публикация черновика |
-| POST | `/flight-delete` | логическое удаление услуги |
-
-Статические файлы доступны по `/static/...` (каталог `resources/`).
 
 ## REST API
 
@@ -212,9 +196,8 @@ internal/app/dsn/                        DSN PostgreSQL из окружения
 internal/app/ds/                         модели: FlightService, User, FlightServiceLike
 internal/app/serializer/                 JSON-представления для клиента (FlightService, User)
 internal/app/repository/                 работа с БД (GORM) и MinIO
-internal/app/handler/                    HTML-обработчики и REST API (api_*.go), CurrentUserID()
-templates/*.html                         страницы плитки, ленты и добавления
-resources/                               статика (стили, медиа по умолчанию)
+internal/app/handler/                    REST API (api_*.go), CurrentUserID()
+resources/media/                         медиа по умолчанию (загружается в MinIO)
 docs/lab2-seed.sql                       наполнение БД (ЛР2)
 docs/lab3-migration.sql                  переход на хранение имён файлов (ЛР3)
 docs/lab3.postman_collection.json        коллекция запросов

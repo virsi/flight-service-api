@@ -47,7 +47,6 @@ package "handler" {
   class Handler {
     + Repository : *Repository
     + RegisterHandler(router)
-    + RegisterStatic(router)
     + GetFlightServicesAPI(ctx)
     + GetFlightFeedAPI(ctx)  // и /feed, и /:id
     + GetFlightDraftAPI(ctx)
@@ -58,12 +57,6 @@ package "handler" {
     + RegisterAPI(ctx)
     + LoginAPI(ctx)
     + LogoutAPI(ctx)
-    + GetFlightServices(ctx) : HTML
-    + GetFlightFeed(ctx) : HTML
-    + GetFlightDraft(ctx) : HTML
-    + CreateFlightDraft(ctx) : HTML
-    + PublishFlightService(ctx) : HTML
-    + DeleteFlightService(ctx) : HTML
     - errorHandler(ctx, code, err)
   }
   class "CurrentUserID()" as CurrentUser <<singleton, id = 1>> {
@@ -81,7 +74,6 @@ package "repository" {
     + GetLikesCounts() : map[uint]int64
     + GetLikesCount(flightServiceID) : int64
     + CreateDraftFlightService(service, userID)
-    + PublishFlightService(userID, description, unit, price)
     + PublishDraftFlightService(userID) : FlightService
     + DeleteFlightService(id, userID)
     + SetLike(serviceID, userID, like) : int64
