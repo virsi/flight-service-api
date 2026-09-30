@@ -178,7 +178,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/api/flight-services/1?next=true",
+          "raw": "{{baseUrl}}/api/flight-services/feed?id=1&next=true",
           "host": [
             "{{baseUrl}}"
           ],
@@ -336,7 +336,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/flight-services/-1",
+              "raw": "{{baseUrl}}/api/flight-services/feed?id=-1",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -356,7 +356,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/flight-services/999999999999",
+              "raw": "{{baseUrl}}/api/flight-services/feed?id=999999999999",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -376,7 +376,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/flight-services/6",
+              "raw": "{{baseUrl}}/api/flight-services/feed?id=6",
               "host": [
                 "{{baseUrl}}"
               ],

@@ -25,8 +25,7 @@ package "Frontend (4 страницы)" {
 package "Домен услуг /api/flight-services" {
   interface FlightServiceAPI <<REST>> {
     + GET /api/flight-services?price : FlightService[]
-    + GET /api/flight-services/feed : FlightService
-    + GET /api/flight-services/:id?next : FlightService
+    + GET /api/flight-services/feed?id&next : FlightService
     + GET /api/flight-services/draft : FlightService
     + POST /api/flight-services (multipart) : FlightService
     + PUT /api/flight-services/draft/publish : FlightService
@@ -48,7 +47,7 @@ package "handler" {
     + Repository : *Repository
     + RegisterHandler(router)
     + GetFlightServicesAPI(ctx)
-    + GetFlightFeedAPI(ctx)  // и /feed, и /:id
+    + GetFlightFeedAPI(ctx)
     + GetFlightDraftAPI(ctx)
     + CreateFlightServiceAPI(ctx)
     + PublishFlightServiceAPI(ctx)

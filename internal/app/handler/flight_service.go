@@ -33,11 +33,11 @@ func statusForError(err error) int {
 	return http.StatusInternalServerError
 }
 
-// resolveFeedService — услуга ленты по :id (+ ?next=true) и число лайков; при ошибке возвращает HTTP-статус
+// resolveFeedService — услуга ленты по ?id= (+ ?next=true) и число лайков; при ошибке возвращает HTTP-статус
 func (h *Handler) resolveFeedService(ctx *gin.Context) (ds.FlightService, int64, int, error) {
 	var id uint
 
-	if idStr := ctx.Param("id"); idStr != "" {
+	if idStr := ctx.Query("id"); idStr != "" {
 		parsed, err := strconv.ParseUint(idStr, 10, 64)
 		if err != nil {
 			return ds.FlightService{}, 0, http.StatusBadRequest, err

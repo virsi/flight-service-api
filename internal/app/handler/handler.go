@@ -21,7 +21,6 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 	api.GET("/flight-services", h.GetFlightServicesAPI)
 	api.GET("/flight-services/feed", h.GetFlightFeedAPI)
 	api.GET("/flight-services/draft", h.GetFlightDraftAPI)
-	api.GET("/flight-services/:id", h.GetFlightFeedAPI)
 	api.POST("/flight-services", h.CreateFlightServiceAPI)
 	api.PUT("/flight-services/draft/publish", h.PublishFlightServiceAPI)
 	api.DELETE("/flight-services/:id", h.DeleteFlightServiceAPI)

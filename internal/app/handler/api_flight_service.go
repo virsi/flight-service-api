@@ -52,7 +52,7 @@ func (h *Handler) GetFlightServicesAPI(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": data})
 }
 
-// GetFlightFeedAPI — лента: /feed и /:id (+ ?next=true)
+// GetFlightFeedAPI — лента: /feed (+ ?id=N, ?next=true)
 func (h *Handler) GetFlightFeedAPI(ctx *gin.Context) {
 	service, likesCount, status, err := h.resolveFeedService(ctx)
 	if err != nil {
